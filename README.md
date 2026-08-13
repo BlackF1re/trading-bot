@@ -80,6 +80,8 @@ docker compose logs -f
 
 Установите **Node.js 22 LTS** с официального сайта Node.js. Настройки установщика можно оставить стандартными.
 
+https://nodejs.org/en/download
+
 ### 2. Скачайте проект
 
 **Code → Download ZIP**, затем распакуйте архив.
