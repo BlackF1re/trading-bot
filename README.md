@@ -76,9 +76,17 @@ docker compose logs -f
 
 ## Вариант 2 — Windows 11 без Docker
 
-### 1. Установите Node.js
+### 1. Проверьте Node.js
 
-Установите **Node.js 22 LTS** с официального сайта Node.js. Настройки установщика можно оставить стандартными.
+Поддерживаются **Node.js 20–24**. Если команда:
+
+```powershell
+node --version
+```
+
+показывает `v20.x`, `v21.x`, `v22.x`, `v23.x` или `v24.x`, ничего переустанавливать не нужно. **Node.js 24 поддерживается и проверяется CI на Windows.**
+
+Если Node.js не установлен, скачайте его с официального сайта:
 
 https://nodejs.org/en/download
 
@@ -114,7 +122,7 @@ start.bat
 
 ## Вариант 3 — Linux без Docker
 
-Нужен Node.js 20–23; рекомендуется Node.js 22 LTS.
+Нужен **Node.js 20–24**.
 
 ```bash
 chmod +x install.sh start.sh
@@ -259,8 +267,8 @@ npm run check
 
 GitHub Actions автоматически проверяет:
 
-- Ubuntu / Node.js 20 и 22;
-- Windows / Node.js 20 и 22;
+- Ubuntu / Node.js 20, 22 и 24;
+- Windows / Node.js 20, 22 и 24;
 - Docker build.
 
 ---

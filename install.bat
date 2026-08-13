@@ -10,9 +10,9 @@ echo ========================================
 echo.
 
 where node >nul 2>nul || goto :node_missing
-node -e "const m=Number(process.versions.node.split('.')[0]);process.exit(m>=20&&m<24?0:1)" || goto :node_wrong
+node -e "const m=Number(process.versions.node.split('.')[0]);process.exit(m>=20&&m<25?0:1)" || goto :node_wrong
 
-echo [1/3] Node.js found: 
+echo [1/3] Node.js found:
 node --version
 
 echo.
@@ -44,11 +44,12 @@ exit /b 0
 
 :node_missing
 echo ERROR: Node.js is not installed.
-echo Install Node.js 22 LTS from https://nodejs.org/ and run install.bat again.
+echo Install Node.js 20-24 from https://nodejs.org/ and run install.bat again.
 goto :failed_pause
 
 :node_wrong
-echo ERROR: Node.js 20-23 is required. Node.js 22 LTS is recommended.
+echo ERROR: Node.js 20-24 is supported. Current version:
+node --version
 goto :failed_pause
 
 :failed
