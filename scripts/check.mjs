@@ -1,9 +1,11 @@
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const roots = ["src", "test", "scripts"];
-const files = roots.flatMap(walk).filter((file) => file.endsWith(".mjs"));
+const roots = ["src", "test", "scripts", "web"].filter(existsSync);
+const files = roots
+  .flatMap(walk)
+  .filter((file) => file.endsWith(".mjs") || file.endsWith(".js"));
 let failed = false;
 
 for (const file of files) {

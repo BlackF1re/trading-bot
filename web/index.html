@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>DEX Arbitrage — Paper Mode</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к данным</a>
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">↔</div><div><h1>DEX Arbitrage</h1><p>STON.fi × DeDust · GRAM / USDT</p></div></div>
+    <div class="header-actions"><span class="mode-badge">PAPER MODE · БЕЗ ДЕНЕГ</span><button id="refreshButton" class="button secondary" type="button">Обновить</button></div>
+  </header>
+  <main id="main" class="layout">
+    <section class="status-panel panel" aria-labelledby="statusTitle">
+      <div><div class="eyebrow">Состояние системы</div><div class="status-line"><span id="statusDot" class="status-dot" aria-hidden="true"></span><h2 id="statusTitle">Подключение…</h2></div><p id="statusMessage" class="muted" aria-live="polite">Получаем состояние сканера.</p></div>
+      <div class="status-meta"><div><span>Последний успешный скан</span><strong id="lastScan">—</strong></div><div><span>Задержка котировки</span><strong id="latency">—</strong></div><div><span>Проверок за сессию</span><strong id="scanCount">0</strong></div></div>
+    </section>
+    <section class="kpi-grid" aria-label="Ключевые показатели">
+      <article class="kpi-card panel"><span>Paper PnL</span><strong id="paperPnl">0.000 USDT</strong><small>Текущая сессия</small></article>
+      <article class="kpi-card panel"><span>Paper-сделок</span><strong id="paperTrades">0</strong><small>После задержки исполнения</small></article>
+      <article class="kpi-card panel"><span>Прибыльных</span><strong id="profitableRate">—</strong><small>Доля сделок с PnL &gt; 0</small></article>
+      <article class="kpi-card panel"><span>Сигнал сохранился</span><strong id="survivalRate">—</strong><small>Выше порога после задержки</small></article>
+      <article class="kpi-card panel"><span>Найдено сигналов</span><strong id="opportunities">0</strong><small>Текущая сессия</small></article>
+    </section>
+    <section class="two-column">
+      <article class="panel chart-panel"><div class="section-head"><div><div class="eyebrow">Paper execution</div><h2>Накопительный PnL последних сделок</h2></div><span id="chartCaption" class="muted">Нет сделок</span></div><div id="pnlChart" class="chart" role="img" aria-label="График накопительного paper PnL"></div></article>
+      <article class="panel settings-panel"><div class="section-head"><div><div class="eyebrow">Настройки</div><h2>Как сейчас работает сканер</h2></div></div><dl id="settingsList" class="settings-list"></dl></article>
+    </section>
+    <section class="panel"><div class="section-head"><div><div class="eyebrow">Live mainnet</div><h2>Рынок сейчас</h2><p class="muted">Последняя котировка для каждого маршрута и размера позиции.</p></div></div><div class="table-wrap"><table><thead><tr><th>Маршрут</th><th>Размер</th><th>Gross</th><th>Net</th><th>Net PnL</th><th>Latency</th><th>Время</th></tr></thead><tbody id="marketRows"><tr><td colspan="7" class="empty">Ожидание первых котировок…</td></tr></tbody></table></div></section>
+    <section class="panel"><div class="section-head"><div><div class="eyebrow">Результат с задержкой</div><h2>Последние paper-сделки</h2><p class="muted">Сравнение сигнала в момент обнаружения с котировкой после моделируемой задержки.</p></div><a class="button secondary" href="/download/paper_trades.csv">Скачать CSV</a></div><div class="table-wrap"><table><thead><tr><th>Время</th><th>Маршрут</th><th>Размер</th><th>При обнаружении</th><th>После задержки</th><th>PnL</th><th>Сигнал выжил</th></tr></thead><tbody id="tradeRows"><tr><td colspan="7" class="empty">Paper-сделок пока нет.</td></tr></tbody></table></div></section>
+    <section class="help-grid">
+      <details class="panel help-card" open><summary>Что означает Net?</summary><p><strong>Net</strong> — оценка результата после двух swap-котировок, резерва на сетевые расходы и safety buffer. Это основной показатель для отбора сигнала.</p></details>
+      <details class="panel help-card"><summary>Почему Paper PnL не равен реальной прибыли?</summary><p>Бот не отправляет транзакции. Модель учитывает задержку, но не может идеально воспроизвести блокчейн-исполнение.</p></details>
+      <details class="panel help-card"><summary>Используются ли реальные деньги?</summary><p>Нет. Панель показывает только read-only paper-результаты.</p></details>
+    </section>
+    <section class="downloads panel"><div><div class="eyebrow">Экспорт</div><h2>Сырые данные</h2><p class="muted">Для собственного анализа или импорта в Excel/Python.</p></div><div class="download-actions"><a class="button secondary" href="/download/snapshots.csv">Все котировки</a><a class="button secondary" href="/download/opportunities.csv">Сигналы</a><a class="button secondary" href="/download/summary.json">Summary JSON</a></div></section>
+  </main>
+  <footer class="footer"><span>Локальная панель · данные не отправляются в отдельный облачный сервис.</span><span id="updatedAt">—</span></footer>
+</body>
+</html>

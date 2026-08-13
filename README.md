@@ -1,49 +1,270 @@
-# trading-bot
+# Trading Bot — TON DEX Paper Arbitrage
 
-Live-mainnet **paper arbitrage scanner** for native **Gram (GRAM) / USD₮** across **STON.fi** and **DeDust** on TON.
+Live-mainnet арбитражный сканер **GRAM / USDT** для **STON.fi ↔ DeDust** с локальным веб-интерфейсом.
 
-It reads current executable swap estimates, models sequential two-leg execution with configurable delays, subtracts an estimated network-cost reserve and safety buffer, and writes results to CSV/JSON. **No wallet, seed, signing, or transaction sending exists in this version.**
+Бот получает текущие swap-оценки, моделирует две последовательные ноги сделки с реальными размерами позиции и заданными задержками, а затем показывает, что произошло бы с PnL.
 
-> Since 15 June 2026, Toncoin (TON) is displayed as Gram (GRAM). This project means the native TON-chain asset, not the separate legacy PoW jetton with a similar name.
+> **PAPER MODE:** кошелёк не нужен. В проекте нет seed-фразы, приватного ключа, подписи или отправки транзакций. Реальные деньги не используются.
 
-## Run
+> **GRAM** в этом проекте — нативный актив сети TON (ранее Toncoin), а не отдельный legacy PoW-jetton с похожим названием.
 
-Requirements: Node.js 20-22.
+После запуска откройте **http://127.0.0.1:3000**. В GUI видны состояние сканера, свежесть данных, gross/net edge, paper PnL, выживаемость сигналов, последние сделки, график и выгрузка CSV.
 
-### Linux
+---
 
-```bash
-cp .env.example .env
-npm install --no-audit --no-fund
-npm run check
-npm start
-```
+## Вариант 1 — Docker (рекомендуется)
+
+Это самый простой способ: Node.js отдельно устанавливать не нужно.
 
 ### Windows 11
 
-Run `install.bat`, then `start.bat`.
+1. Установите **Docker Desktop** с официального сайта Docker и запустите его. Дождитесь состояния `Engine running`.
+2. На GitHub нажмите **Code → Download ZIP** и распакуйте проект, например в `C:\trading-bot`.
+3. Откройте эту папку, нажмите правой кнопкой по пустому месту → **Открыть в терминале**.
+4. Выполните:
 
-### Docker
+```powershell
+docker compose up --build -d
+```
+
+5. Откройте в браузере:
+
+```text
+http://127.0.0.1:3000
+```
+
+Готово. Бот работает в фоне.
+
+Полезные команды:
+
+```powershell
+# состояние
+docker compose ps
+
+# технический лог
+docker compose logs -f
+
+# остановить
+docker compose down
+
+# запустить снова
+docker compose up -d
+```
+
+`Ctrl+C` при просмотре логов закрывает только просмотр логов — сам контейнер продолжает работать.
+
+### Linux
+
+Установите Docker Engine и Docker Compose plugin, затем в папке проекта:
 
 ```bash
-cp .env.example .env
 docker compose up --build -d
+```
+
+GUI: **http://127.0.0.1:3000**
+
+Остановка и логи:
+
+```bash
+docker compose down
 docker compose logs -f
 ```
 
-Results are written to `data/`:
+`.env` для первого запуска **не требуется**: Compose использует безопасные значения по умолчанию.
 
-- `snapshots.csv` — every checked route;
-- `opportunities.csv` — detected edges above the configured threshold;
-- `paper_trades.csv` — delayed sequential paper executions;
-- `summary.json` — rolling statistics.
+---
 
-Generate a report with:
+## Вариант 2 — Windows 11 без Docker
+
+### 1. Установите Node.js
+
+Установите **Node.js 22 LTS** с официального сайта Node.js. Настройки установщика можно оставить стандартными.
+
+### 2. Скачайте проект
+
+**Code → Download ZIP**, затем распакуйте архив.
+
+### 3. Установите бота
+
+Дважды щёлкните:
+
+```text
+install.bat
+```
+
+Скрипт сам проверит Node.js, установит зависимости, создаст `.env` и запустит self-check. В конце должно появиться:
+
+```text
+Installation completed successfully.
+```
+
+### 4. Запустите
+
+Дважды щёлкните:
+
+```text
+start.bat
+```
+
+Браузер с GUI откроется автоматически. Для остановки нажмите `Ctrl+C` в окне бота.
+
+---
+
+## Вариант 3 — Linux без Docker
+
+Нужен Node.js 20–23; рекомендуется Node.js 22 LTS.
+
+```bash
+chmod +x install.sh start.sh
+./install.sh
+./start.sh
+```
+
+Затем откройте **http://127.0.0.1:3000**. Остановка: `Ctrl+C`.
+
+---
+
+## Что должно происходить после запуска
+
+GUI сначала может показывать `Подключение к mainnet`, затем — `Сканер работает`.
+
+Если TON/DeDust временно недоступен, появится `Нет связи, повторяем`. Это не аварийное завершение: бот повторяет подключение каждые 10 секунд.
+
+Таблица «Рынок сейчас» заполняется после первых котировок. Paper-сделка создаётся только когда `Net` достигает порога `MIN_SIGNAL_PCT`.
+
+### Основные показатели
+
+**Gross** — результат кругового маршрута по двум swap-оценкам до дополнительного резерва на сеть и safety buffer.
+
+**Net** — основной показатель сигнала:
+
+```text
+результат двух swap-оценок
+− оценочный резерв сетевых расходов
+− safety buffer
+```
+
+**Paper PnL** — результат повторного расчёта после моделируемой задержки. Например, сигнал мог быть `+0.40%`, но после задержки стать `+0.08%` или `-0.10%`.
+
+**Сигнал сохранился** — `Net` остался выше заданного порога после задержки исполнения.
+
+---
+
+## Где лежат результаты
+
+Все данные сохраняются в `data/`:
+
+| Файл | Содержимое |
+|---|---|
+| `snapshots.csv` | все проверки маршрутов |
+| `opportunities.csv` | обнаруженные сигналы |
+| `paper_trades.csv` | paper-сделки после задержки |
+| `summary.json` | сводка текущей сессии |
+
+CSV/JSON можно скачать прямо из GUI.
+
+Текстовый отчёт:
 
 ```bash
 npm run report
 ```
 
-Configuration is documented inline in `.env.example`. Paper PnL is **not realized PnL**: no transaction enters a block, so actual gas, inclusion timing, failures, ordering, and competition are not perfectly reproduced.
+В Docker:
 
-Future wallet/live-trading notes: [`docs/WALLET.md`](docs/WALLET.md).
+```bash
+docker compose exec trading-bot npm run report
+```
+
+---
+
+## Настройки
+
+Для первого запуска ничего менять не нужно.
+
+Если нужна настройка, скопируйте `.env.example` в `.env` и отредактируйте `.env`. На Windows `install.bat` создаёт его автоматически.
+
+| Параметр | Default | Что делает |
+|---|---:|---|
+| `TRADE_SIZES_USDT` | `10,25,50,100,250` | размеры тестовых позиций |
+| `POLL_INTERVAL_MS` | `5000` | период сканирования |
+| `MIN_SIGNAL_PCT` | `0.10` | минимальный Net для сигнала |
+| `DETECTION_TO_EXECUTION_MS` | `1200` | задержка до первой ноги |
+| `BETWEEN_LEGS_MS` | `2500` | задержка между ногами |
+| `ESTIMATED_GAS_PER_LEG_GRAM` | `0.05` | оценочный gas reserve на ногу |
+| `SAFETY_BUFFER_BPS` | `10` | дополнительный запас |
+| `UI_PORT` | `3000` | порт GUI |
+
+После изменения `.env` перезапустите приложение.
+
+---
+
+## Безопасность GUI
+
+Нативный запуск по умолчанию слушает только `127.0.0.1`. Docker тоже публикует порт только на `127.0.0.1` хоста. Панель поэтому не выставляется напрямую в LAN/Internet.
+
+Не меняйте `UI_HOST` на `0.0.0.0` без понимания сетевой безопасности.
+
+Будущий live-режим должен использовать **отдельный hot-wallet с ограниченным балансом**, а не основной кошелёк. Архитектурные заметки: [`docs/WALLET.md`](docs/WALLET.md).
+
+---
+
+## Решение типичных проблем
+
+### GUI не открывается
+
+Проверьте адрес:
+
+```text
+http://127.0.0.1:3000
+```
+
+Docker:
+
+```bash
+docker compose ps
+docker compose logs --tail=100
+```
+
+Windows без Docker: окно `start.bat` должно оставаться открытым.
+
+### Порт 3000 занят
+
+Создайте/откройте `.env` и задайте:
+
+```env
+UI_PORT=3001
+```
+
+Перезапустите приложение и откройте `http://127.0.0.1:3001`.
+
+### «Нет связи, повторяем»
+
+Бот сам повторяет подключение. Если сообщение остаётся несколько минут, проверьте интернет, VPN/DNS и лог.
+
+### Начать статистику с нуля
+
+Остановите бот и удалите из `data/` файлы `snapshots.csv`, `opportunities.csv`, `paper_trades.csv`, `summary.json`. При запуске они создадутся заново.
+
+---
+
+## Проверка проекта
+
+```bash
+npm run check
+```
+
+Она включает syntax-check и tests, в том числе интеграционный тест локального HTTP dashboard.
+
+GitHub Actions автоматически проверяет:
+
+- Ubuntu / Node.js 20 и 22;
+- Windows / Node.js 20 и 22;
+- Docker build.
+
+---
+
+## Ограничение Paper Mode
+
+Paper PnL — **не фактически заработанные деньги**. Транзакция не входит в блокчейн, поэтому модель не может идеально воспроизвести фактический gas, block inclusion, ordering, конкурирующих ботов, bounce/fail и риск исполнения только первой ноги.
+
+Цель этой версии — получить live-mainnet статистику **до риска реальным капиталом**.

@@ -1,8 +1,8 @@
 {
   "name": "ton-gram-paper-arbitrage",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Live-mainnet paper arbitrage scanner for native Gram/USDT across STON.fi and DeDust.",
+  "description": "Live-mainnet paper arbitrage scanner with local dashboard for native Gram/USDT across STON.fi and DeDust.",
   "type": "module",
   "engines": {
     "node": ">=20 <24"
